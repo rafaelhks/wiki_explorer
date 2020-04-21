@@ -27,6 +27,7 @@ class _WikipediaExplorerState extends State<WikipediaExplorer> {
   final Set<String> _favorites = Set<String>();
   final dbHelper = DatabaseHelper.instance;
   Favorite fav;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -52,32 +53,54 @@ class _WikipediaExplorerState extends State<WikipediaExplorer> {
       //   // ]
       // ),
       body: new SafeArea(
-        child: WebView(
-          initialUrl: widget.initURL,
-          onWebViewCreated: (WebViewController webViewController) {
-            _controller.complete(webViewController);
-            setState(() {
-              _wvController = webViewController;
-            });
-          },
-          onPageFinished: (String url) {
-              //Navigator.of(_keyLoader.currentContext, rootNavigator: true).pop();
-              _defineIfIsFav(url);
-          },
-          onPageStarted: (String url){
-            //showLoadingDialog(context);
-          },
-          javascriptMode: JavascriptMode.unrestricted,
-          navigationDelegate: _interceptNavigation,
+        child: Stack(
+          children: <Widget>[
+            WebView(
+              initialUrl: widget.initURL,
+              onWebViewCreated: (WebViewController webViewController) {
+                _controller.complete(webViewController);
+                setState(() {
+                  _wvController = webViewController;
+                });
+              },
+              onPageFinished: (String url) {
+                  _stopLoading();
+                  _defineIfIsFav(url);
+              },
+              onPageStarted: (String url){
+                _startLoading();
+              },
+              javascriptMode: JavascriptMode.unrestricted,
+              navigationDelegate: _interceptNavigation,
+            ),
+            Visibility(
+              child: Container(
+                color: Colors.black45,
+                child: Center(
+                  child: CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),)
+                ),
+              ),
+              visible: isLoading,
+            )
+          ]
         ),
       ),
       //floatingActionButton: _bookmarkButton(),
       bottomNavigationBar: BottomNavigationBar(
         onTap: (index) {_bottomItemTap(index);},
+        type: BottomNavigationBarType.fixed,
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.collections_bookmark, color: Color(0xFF4f4f4f),),
             title: Text('Favoritos'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.arrow_back, color: Color(0xFF4f4f4f)),
+            title: Text('Voltar'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.arrow_forward, color: Color(0xFF4f4f4f),),
+            title: Text('Avançar'),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite, color: _isFav() ? Colors.red : Color(0xFF4f4f4f)),
@@ -123,6 +146,16 @@ class _WikipediaExplorerState extends State<WikipediaExplorer> {
       _defineIfIsFav(fav.link);
     }
     else if(index==1){
+      _wvController.canGoBack().then((can) {
+        if(can) _wvController.goBack();
+      });
+    }
+    else if(index==2){
+      _wvController.canGoForward().then((can) {
+        if(can) _wvController.goForward();
+      });
+    }
+    else if(index==3){
       _favoriteCurrent();
     }
   }
@@ -148,7 +181,12 @@ class _WikipediaExplorerState extends State<WikipediaExplorer> {
 
   _favoriteCurrent() async{
     String url = await _wvController.currentUrl();
-    String name = await _wvController.getTitle();
+    String title = await _wvController.getTitle();
+    int idx = title.lastIndexOf('–');
+    String name = title;
+    if(idx>0){
+      name = title.substring(0, idx);
+    }
 
     if(_isFav()){
       dbHelper.deleteWhere(fav, '${fav.colLink} = ?', [url]).then((ret) {
@@ -254,5 +292,17 @@ class _WikipediaExplorerState extends State<WikipediaExplorer> {
                 ]));
       }
     );
+  }
+
+  _startLoading(){
+    setState(() {
+      isLoading = true;
+    });
+  }
+
+  _stopLoading(){
+    setState(() {
+      isLoading = false;
+    });
   }
 }

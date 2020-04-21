@@ -39,11 +39,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
         ),
         body: Center(
           child: SingleChildScrollView(
-            child: Container(
+            child: 
+              favorites.length == 0 ? Text('Nenhum registro encontrado :(', style: TextStyle(color: Colors.black),) :
+              Container(
               height: MediaQuery.of(context).size.height,
               child: Column(
                 children: <Widget>[
-                  favorites.length == 0 ? Text('Nenhum registro encontrado.'):
                   Expanded(
                     flex: 8,
                     child: new ListView.builder(
@@ -51,7 +52,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
                       itemBuilder: (context, position) {
                         return Column(
                           children: <Widget>[
-                            Divider(height: 5.0, color: Colors.black,),
                             ListTile(
                               contentPadding: EdgeInsets.only(left: 10, right:10),
                               title: Text(
@@ -62,20 +62,15 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                   color: Colors.black,
                                 ),
                               ),
-                              subtitle: Text('${favorites[position].link}',
-                                    style: new TextStyle(
-                                    fontSize: 12.0,
-                                    fontStyle: FontStyle.italic,
-                                    color: Colors.grey[400])
-                              ),
                               trailing: IconButton(
-                                icon: Icon(Icons.delete_forever), 
+                                icon: Icon(Icons.delete_forever, color: Colors.grey[700],), 
                                 onPressed: () {_remove(position, favorites[position]);}
                               ),
                               onTap: () {
                                 _open(favorites[position]);
                               }
                             ),
+                            Divider(height: 5.0, color: Colors.grey[400],),
                           ],
                         );
                       }),

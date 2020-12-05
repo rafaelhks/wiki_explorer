@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 import 'model/datamodel.dart';
 import 'model/favorite.dart';
@@ -85,9 +86,14 @@ class DatabaseHelper {
   }
 
   Future<List> listWhere(DataModel tableModel, String where) async{
-    var dbClient = await instance.database;
-    var result = await dbClient.query(tableModel.tableName, where: where);
-    return result.toList();
+    try {
+      var dbClient = await instance.database;
+      var result = await dbClient.query(tableModel.tableName, where: where);
+      return result.toList();
+    } catch (e) {
+      print(e);
+      return [];
+    }
   }
 
   Future<List> list(DataModel tableModel) async{

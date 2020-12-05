@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -304,5 +306,12 @@ class _WikipediaExplorerState extends State<WikipediaExplorer> {
     setState(() {
       isLoading = false;
     });
+  }
+
+  Future<void> _testeHTML() {
+    _wvController.evaluateJavascript("encodeURIComponent(document.documentElement.innerHTML);").then((html){
+      _wvController.loadUrl(Uri.dataFromString(Uri.decodeFull(html), mimeType: 'text/html', encoding: Encoding.getByName('utf-8')).toString());
+    });
+    
   }
 }

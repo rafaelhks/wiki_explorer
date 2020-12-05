@@ -53,7 +53,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                         return Column(
                           children: <Widget>[
                             ListTile(
-                              contentPadding: EdgeInsets.only(left: 10, right:10),
+                              contentPadding: EdgeInsets.only(left: 10,),
                               title: Text(
                                 '${favorites[position].name}',
                                 style: TextStyle(
@@ -62,15 +62,23 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                   color: Colors.black,
                                 ),
                               ),
-                              trailing: IconButton(
-                                icon: Icon(Icons.delete_forever, color: Colors.grey[700],), 
-                                onPressed: () {_remove(position, favorites[position]);}
+                              trailing: InkWell(
+                                child: Container(
+                                  child: Icon(Icons.cancel, color: Colors.white,), 
+                                  color: Colors.red,
+                                  height: double.maxFinite,
+                                  width: 45,
+                                ),
+                                onTap: () {_remove(position, favorites[position]);},
                               ),
                               onTap: () {
                                 _open(favorites[position]);
                               }
                             ),
-                            Divider(height: 5.0, color: Colors.grey[400],),
+                            Container(
+                              height: 1,
+                              color: Colors.grey[350],
+                            )
                           ],
                         );
                       }),
